@@ -106,8 +106,32 @@ async function createDemo(collection) {
 
 
     // Read
-    const findResult = await collection.findOne({ name: "John Doe" });
-    console.log('Found document:', findResult);
+ async function readDemo(collection) {
+  console.log("\n=== READ ===");
+
+  // Find one
+  const john = await collection.findOne({ name: "John Doe" });
+  console.log("FindOne John Doe:", john);
+
+  // Find many by filter
+  const csStudents = await collection.find({ major: "Computer Science" }).toArray();
+  console.log("CS students:", csStudents.map(s => s.name));
+
+  // Projection (exclude _id, include only selected fields)
+  const projection = await collection
+    .find({}, { projection: { _id: 0, name: 1, major: 1, gpa: 1 } })
+    .toArray();
+  console.log("Projection (name, major, gpa):", projection);
+
+  // Sort (by GPA descending)
+  const sortedByGpa = await collection.find({}).sort({ gpa: -1 }).toArray();
+  console.log("Sorted by GPA desc:", sortedByGpa.map(s => `${s.name} (${s.gpa})`));
+
+  // Comparison operator: age >= 25
+  const age25Plus = await collection.find({ age: { $gte: 25 } }).toArray();
+  console.log("Age >= 25:", age25Plus.map(s => s.name));
+}
+
 
   } catch (err) {
     console.error('Error: ', err);
