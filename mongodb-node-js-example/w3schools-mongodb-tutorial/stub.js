@@ -213,15 +213,11 @@ async function main() {
             console.log("deleteMany deleted:", deleteManyResult.deletedCount);
         }
 
-        // ✅ Run your demos (this is what was missing)
-        await resetCollection(collection); // comment out if not allowed by teacher
+        await resetCollection(collection);
         await createDemo(collection);
         await readDemo(collection);
         await updateDemo(collection);
         await deleteDemo(collection);
-
-        // Next step: we’ll add aggregation blocks here (after CRUD)
-        // await aggBlock1(...); etc.
     } catch (err) {
         console.error("Error: ", err);
     } finally {
