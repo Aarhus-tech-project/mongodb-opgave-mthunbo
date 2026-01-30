@@ -129,7 +129,7 @@ async function main() {
                 .toArray();
             console.log("Projection (name, major, gpa):", projection);
 
-            // Sort (by GPA descending)
+            // Sort by GPA descending
             const sortedByGpa = await collection.find({}).sort({ gpa: -1 }).toArray();
             console.log(
                 "Sorted by GPA desc:",
@@ -159,7 +159,7 @@ async function main() {
                 updateOneResult.modifiedCount
             );
 
-            // updateOne: add course (no duplicates)
+            // updateOne: add course
             const addCourseResult = await collection.updateOne(
                 { name: "John Doe" },
                 { $addToSet: { courses: "Operating Systems" } }
@@ -212,11 +212,87 @@ async function main() {
             const deleteManyResult = await collection.deleteMany({ gpa: { $lt: 3.0 } });
             console.log("deleteMany deleted:", deleteManyResult.deletedCount);
         }
+        async function aggregations(collection) {
+            // Count per major
+            const countPerMajor = await collection
+                .aggregate([
+                    { $group: { _id: "$major", studentCount: { $sum: 1 } } },
+                    { $sort: { studentCount: -1 } },
+                ])
+                .toArray();
+            console.log("Count per major:", countPerMajor);
+
+            // Average GPA per major
+            const avgGpaPerMajor = await collection
+                .aggregate([
+                    { $group: { _id: "$major", avgGpa: { $avg: "$gpa" } } },
+                    { $sort: { avgGpa: -1 } },
+                ])
+                .toArray();
+            console.log("Avg GPA per major:", avgGpaPerMajor);
+
+            // Min/max age per major
+            const minMaxAgePerMajor = await collection
+                .aggregate([
+                    {
+                        $group: {
+                            _id: "$major",
+                            minAge: { $min: "$age" },
+                            maxAge: { $max: "$age" },
+                        },
+                    },
+                    { $sort: { _id: 1 } },
+                ])
+                .toArray();
+            console.log("Min/max age per major:", minMaxAgePerMajor);
+
+            // Age buckets
+            const ageBuckets = await collection
+                .aggregate([
+                    {
+                        $bucket: {
+                            groupBy: "$age",
+                            boundaries: [18, 22, 26, 30, 100],
+                            default: "Other",
+                            output: {
+                                count: { $sum: 1 },
+                                names: { $push: "$name" },
+                            },
+                        },
+                    },
+                ])
+                .toArray();
+            console.log("Age buckets:", ageBuckets);
+
+            // Course popularity
+            const coursePopularity = await collection
+                .aggregate([
+                    { $unwind: "$courses" },
+                    { $group: { _id: "$courses", count: { $sum: 1 } } },
+                    { $sort: { count: -1 } },
+                ])
+                .toArray();
+            console.log("Course popularity:", coursePopularity);
+
+            // Students who took "Databases", grouped by major
+            const databasesByMajor = await collection
+                .aggregate([
+                    { $match: { courses: "Databases" } },
+                    { $group: { _id: "$major", count: { $sum: 1 }, students: { $push: "$name" } } },
+                    { $sort: { count: -1 } },
+                ])
+                .toArray();
+            console.log('"Databases" students by major:', databasesByMajor);
+        }
 
         await resetCollection(collection);
+
         await createDemo(collection);
         await readDemo(collection);
         await updateDemo(collection);
+
+        await aggregations(collection);
+
         await deleteDemo(collection);
     } catch (err) {
         console.error("Error: ", err);
