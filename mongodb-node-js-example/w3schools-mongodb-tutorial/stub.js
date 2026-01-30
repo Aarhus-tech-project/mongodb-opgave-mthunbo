@@ -38,12 +38,72 @@ async function main() {
     const collection = db.collection(collectionName);
 
     // Insert one
-    const insertResult = await collection.insertOne({
-      name: "John Doe",
-      age: 25,
-      major: "Computer Science"
-    });
-    console.log('Inserted document:', insertResult.insertedId);
+async function createDemo(collection) {
+  console.log("\n=== CREATE ===");
+
+  // Insert one
+  const insertOneResult = await collection.insertOne({
+    name: "John Doe",
+    age: 25,
+    major: "Computer Science",
+    semester: 3,
+    gpa: 3.2,
+    courses: ["Databases", "Algorithms"],
+    createdAt: new Date(),
+  });
+  console.log("Inserted one ID:", insertOneResult.insertedId);
+
+  // Insert many
+  const insertManyResult = await collection.insertMany([
+    {
+      name: "Jane Smith",
+      age: 22,
+      major: "Computer Science",
+      semester: 2,
+      gpa: 3.8,
+      courses: ["Databases", "Web Dev"],
+      createdAt: new Date(),
+    },
+    {
+      name: "Ali Khan",
+      age: 27,
+      major: "Business",
+      semester: 4,
+      gpa: 2.9,
+      courses: ["Accounting", "Economics"],
+      createdAt: new Date(),
+    },
+    {
+      name: "Sofia Jensen",
+      age: 24,
+      major: "Business",
+      semester: 1,
+      gpa: 3.5,
+      courses: ["Economics", "Marketing"],
+      createdAt: new Date(),
+    },
+    {
+      name: "Mikkel Larsen",
+      age: 21,
+      major: "Design",
+      semester: 2,
+      gpa: 3.1,
+      courses: ["UX", "Typography"],
+      createdAt: new Date(),
+    },
+    {
+      name: "Emma Nguyen",
+      age: 29,
+      major: "Computer Science",
+      semester: 5,
+      gpa: 3.9,
+      courses: ["AI", "Databases"],
+      createdAt: new Date(),
+    },
+  ]);
+  console.log("Inserted many count:", insertManyResult.insertedCount);
+}
+
 
     // Read
     const findResult = await collection.findOne({ name: "John Doe" });
