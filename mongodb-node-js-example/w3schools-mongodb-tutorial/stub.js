@@ -36,7 +36,12 @@ async function main() {
         const db = client.db(dbName);
         const collection = db.collection(collectionName);
 
-        // Insert one
+        // Optional helper: prevents duplicate inserts each run
+        async function resetCollection(collection) {
+            await collection.deleteMany({});
+        }
+
+        // Insert Demo
         async function createDemo(collection) {
             console.log("\n=== CREATE ===");
 
@@ -103,7 +108,7 @@ async function main() {
             console.log("Inserted many count:", insertManyResult.insertedCount);
         }
 
-        // Read
+        // Read Demo
         async function readDemo(collection) {
             console.log("\n=== READ ===");
 
@@ -139,6 +144,7 @@ async function main() {
             );
         }
 
+        // Update Demo
         async function updateDemo(collection) {
             console.log("\n=== UPDATE ===");
 
@@ -193,6 +199,29 @@ async function main() {
             );
             console.log("upsert upsertedId:", upsertResult.upsertedId ?? null);
         }
+
+        // Delete Demo
+        async function deleteDemo(collection) {
+            console.log("\n=== DELETE ===");
+
+            // deleteOne
+            const deleteOneResult = await collection.deleteOne({ name: "Ali Khan" });
+            console.log("deleteOne deleted:", deleteOneResult.deletedCount);
+
+            // deleteMany
+            const deleteManyResult = await collection.deleteMany({ gpa: { $lt: 3.0 } });
+            console.log("deleteMany deleted:", deleteManyResult.deletedCount);
+        }
+
+        // ✅ Run your demos (this is what was missing)
+        await resetCollection(collection); // comment out if not allowed by teacher
+        await createDemo(collection);
+        await readDemo(collection);
+        await updateDemo(collection);
+        await deleteDemo(collection);
+
+        // Next step: we’ll add aggregation blocks here (after CRUD)
+        // await aggBlock1(...); etc.
     } catch (err) {
         console.error("Error: ", err);
     } finally {
